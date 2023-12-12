@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MessageHardcode.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SocketSpeak</a> &gt; <a href="index.source.html" class="el_package">Message</a> &gt; <span class="el_source">MessageHardcode.java</span></div><h1>MessageHardcode.java</h1><pre class="source lang-java linenums">package Message;
+
+/**
+ * Represents the Message Hardcode
+ */
+<span class="nc" id="L6">public class MessageHardcode {</span>
+
+    /**
+     * Message identifier for different type of message
+     */
+<span class="nc" id="L11">    public static class Identifier{</span>
+
+        /**
+         * Identifier for CONNECT_MESSAGE
+         */
+        public final static int CONNECT_MESSAGE = 19;
+
+        /**
+         * Identifier for CONNECT_RESPONSE
+         */
+        public final static int CONNECT_RESPONSE = 20;
+
+        /**
+         * Identifier for DISCONNECT_MESSAGE
+         */
+        public final static int DISCONNECT_MESSAGE = 21;
+
+        /**
+         * Identifier for QUERY_CONNECTED_USERS
+         */
+        public final static int QUERY_CONNECTED_USERS = 22;
+
+        /**
+         * Identifier for QUERY_USER_RESPONSE
+         */
+        public final static int QUERY_USER_RESPONSE = 23;
+
+        /**
+         * Identifier for BROADCAST_MESSAGE
+         */
+        public final static int BROADCAST_MESSAGE = 24;
+
+        /**
+         * Identifier for DIRECT_MESSAGE
+         */
+        public final static int DIRECT_MESSAGE = 25;
+
+        /**
+         * Identifier for FAILED_MESSAGE
+         */
+        public final static int FAILED_MESSAGE = 26;
+
+        /**
+         * Identifier for SEND_INSULT
+         */
+        public final static int SEND_INSULT = 27;
+    }
+
+    /**
+     * Delimiter is message for parsing
+     */
+    public final static char DELIMITER = ' ';
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

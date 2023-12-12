@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Message.QueryUsersResponseTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2023-12-12T03:28:58" hostname="bellas-mbp.lan" time="0.001">
+  <properties/>
+  <testcase name="serializeAndDeserialize()" classname="Message.QueryUsersResponseTest" time="0.0"/>
+  <testcase name="serializeAndDeserialize2()" classname="Message.QueryUsersResponseTest" time="0.0"/>
+  <testcase name="getIdentifierTest()" classname="Message.QueryUsersResponseTest" time="0.0"/>
+  <testcase name="equalsTest()" classname="Message.QueryUsersResponseTest" time="0.0"/>
+  <testcase name="hashCodeTest()" classname="Message.QueryUsersResponseTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

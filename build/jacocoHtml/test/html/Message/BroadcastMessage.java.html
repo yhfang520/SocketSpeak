@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BroadcastMessage.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SocketSpeak</a> &gt; <a href="index.source.html" class="el_package">Message</a> &gt; <span class="el_source">BroadcastMessage.java</span></div><h1>BroadcastMessage.java</h1><pre class="source lang-java linenums">package Message;
+
+import static Message.MessageHardcode.Identifier.BROADCAST_MESSAGE;
+
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+
+/**
+ * Represents the Broadcast Message
+ */
+public class BroadcastMessage implements Message{
+  private int identifier;
+  private String senderUsername;
+  private String message;
+
+  /**
+   * Constructor for BroadcastMessage
+   */
+<span class="fc" id="L21">  public BroadcastMessage() {</span>
+<span class="fc" id="L22">    this.identifier = BROADCAST_MESSAGE;</span>
+<span class="fc" id="L23">  }</span>
+
+  /**
+   * Constructor for BroadcastMessage
+   *
+   * @param senderUsername the sender username
+   * @param message  the username
+   */
+<span class="fc" id="L31">  public BroadcastMessage(String senderUsername, String message) {</span>
+<span class="fc" id="L32">    this.identifier = BROADCAST_MESSAGE;</span>
+<span class="fc" id="L33">    this.senderUsername = senderUsername;</span>
+<span class="fc" id="L34">    this.message = message;</span>
+<span class="fc" id="L35">  }</span>
+
+  /**
+   * Deserialize the BroadcastMessage from the DataInputStream
+   * @param dataInputStream the input stream
+   * @return deserialize username
+   */
+  @Override
+  public String deserialize(DataInputStream dataInputStream) {
+    try {
+<span class="fc" id="L45">      dataInputStream.readChar();</span>
+
+<span class="fc" id="L47">      int senderNameLength  = dataInputStream.readInt();</span>
+<span class="fc" id="L48">      dataInputStream.readChar();</span>
+<span class="fc" id="L49">      byte[] buffer = new byte[senderNameLength];</span>
+<span class="fc" id="L50">      dataInputStream.readFully(buffer);</span>
+<span class="fc" id="L51">      senderUsername = new String(buffer, StandardCharsets.UTF_8);</span>
+<span class="fc" id="L52">      dataInputStream.readChar();</span>
+
+<span class="fc" id="L54">      int msgLength  = dataInputStream.readInt();</span>
+<span class="fc" id="L55">      dataInputStream.readChar();</span>
+<span class="fc" id="L56">      buffer = new byte[msgLength];</span>
+<span class="fc" id="L57">      dataInputStream.readFully(buffer);</span>
+<span class="fc" id="L58">      message = new String(buffer, StandardCharsets.UTF_8);</span>
+
+<span class="fc" id="L60">      return this.toString();</span>
+
+<span class="fc" id="L62">    } catch (IOException e) {</span>
+<span class="fc" id="L63">      throw new RuntimeException(e);</span>
+    }
+  }
+
+  /**
+   * Serialize the BroadcastMessage to the byte array
+   * @return byte array
+   */
+  @Override
+  public byte[] serialize() {
+<span class="fc" id="L73">    MessageHandler messageHandler = new MessageHandler();</span>
+<span class="fc" id="L74">    byte[] boardcast = messageHandler.join(null,this.identifier);</span>
+<span class="fc" id="L75">    boardcast = messageHandler.join(boardcast,senderUsername);</span>
+<span class="fc" id="L76">    return messageHandler.join(boardcast,message);</span>
+  }
+
+  /**
+   * Get the user's name
+   * @return the user's name
+   */
+  public String getUsername() {
+<span class="fc" id="L84">    return this.senderUsername;</span>
+  }
+
+  /**
+   * Get the identifier
+   * @return the identifier
+   */
+  public int getIdentifier() {
+<span class="fc" id="L92">    return this.identifier;</span>
+  }
+
+  /**
+   * Make sure the BroadcastMessage objects are equals
+   * @return true if it's all equal
+   */
+  @Override
+  public boolean equals(Object ob) {
+<span class="fc bfc" id="L101" title="All 2 branches covered.">    if(this == ob) {</span>
+<span class="fc" id="L102">      return true;</span>
+    }
+<span class="fc bfc" id="L104" title="All 4 branches covered.">    if(ob == null || getClass() != ob.getClass()) {</span>
+<span class="fc" id="L105">      return false;</span>
+    }
+<span class="fc" id="L107">    BroadcastMessage broadcastMessage = (BroadcastMessage) ob;</span>
+<span class="fc bfc" id="L108" title="All 2 branches covered.">    return Objects.equals(senderUsername, broadcastMessage.senderUsername)</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">            &amp;&amp; Objects.equals(message, broadcastMessage.message);</span>
+  }
+
+  /**
+   * Hash code of the BroadcastMessage object
+   * @return hash code
+   */
+  @Override
+  public int hashCode() {
+<span class="fc" id="L118">    return Objects.hash(identifier, senderUsername, message);</span>
+  }
+
+  /**
+   * To string show all the BroadcastMessage's info
+   * @return string
+   */
+  @Override
+  public String toString() {
+<span class="fc" id="L127">    return String.format(&quot;(Broadcast Message) %s send to All: %s&quot;, getUsername(),message);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

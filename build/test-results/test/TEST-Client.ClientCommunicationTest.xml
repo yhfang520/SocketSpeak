@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Client.ClientCommunicationTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2023-12-12T03:28:56" hostname="bellas-mbp.lan" time="2.016">
+  <properties/>
+  <testcase name="keepCommunicating()" classname="Client.ClientCommunicationTest" time="1.005"/>
+  <testcase name="connectAndDisConnect()" classname="Client.ClientCommunicationTest" time="1.006"/>
+  <testcase name="testParseCommand()" classname="Client.ClientCommunicationTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[Exception in thread "Thread-19" java.lang.RuntimeException: java.io.IOException: Stream closed
+	at Client.ClientCommunication.keepCommunicating(ClientCommunication.java:117)
+	at Client.ClientCommunication.run(ClientCommunication.java:74)
+	at Client.ClientCommunicationTest.lambda$keepCommunicating$3(ClientCommunicationTest.java:120)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+Caused by: java.io.IOException: Stream closed
+	at java.base/java.io.BufferedInputStream.getInIfOpen(BufferedInputStream.java:157)
+	at java.base/java.io.BufferedInputStream.available(BufferedInputStream.java:408)
+	at Client.ClientCommunication.keepCommunicating(ClientCommunication.java:107)
+	... 3 more
+]]></system-err>
+</testsuite>

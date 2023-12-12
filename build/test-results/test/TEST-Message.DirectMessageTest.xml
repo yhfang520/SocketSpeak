@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Message.DirectMessageTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2023-12-12T03:28:58" hostname="bellas-mbp.lan" time="0.002">
+  <properties/>
+  <testcase name="testSerializeAndDeserialize()" classname="Message.DirectMessageTest" time="0.0"/>
+  <testcase name="constructorTest()" classname="Message.DirectMessageTest" time="0.0"/>
+  <testcase name="testSerializeAndDeserialize2()" classname="Message.DirectMessageTest" time="0.0"/>
+  <testcase name="equalsTest()" classname="Message.DirectMessageTest" time="0.0"/>
+  <testcase name="hashCodeTest()" classname="Message.DirectMessageTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

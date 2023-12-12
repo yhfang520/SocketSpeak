@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ClientConnectionHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SocketSpeak</a> &gt; <a href="index.source.html" class="el_package">Server</a> &gt; <span class="el_source">ClientConnectionHandler.java</span></div><h1>ClientConnectionHandler.java</h1><pre class="source lang-java linenums">package Server;
+
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
+
+import Message.*;
+import java.util.Iterator;
+
+import randomInsult.RandomInsultGenerator;
+import static Message.MessageHardcode.Identifier.*;
+
+
+/**
+ * This class will handle just one Client Connection handle communication with this user.
+ */
+public class ClientConnectionHandler implements Runnable {
+
+  private String clientName;
+  private Socket clientSocket;
+  private UsersSocketManager usersSocketManager;
+  private InputStream inputStream;
+  private OutputStream outputStream;
+  private MessageHandler messageHandler;
+
+  /**
+   * The init identifier
+   */
+  public static final int INIT_IDENTIFIER = -1;
+
+  /**
+   * The server name
+   */
+  public static final String SERVER_NAME = &quot;[Server]&quot;;
+
+  /**
+   * Data input stream
+   */
+  public DataInputStream dataInputStream;
+
+  /**
+   * Constructor for ClientConnectionHandler
+   *
+   * @param clientSocket              the socket for communication with client
+   * @param usersSocketManager        the users socket manager
+   */
+<span class="fc" id="L49">  public ClientConnectionHandler(Socket clientSocket, UsersSocketManager usersSocketManager) {</span>
+<span class="fc" id="L50">    this.clientSocket = clientSocket;</span>
+    try {
+<span class="fc" id="L52">      this.inputStream = this.clientSocket.getInputStream();</span>
+<span class="fc" id="L53">      this.dataInputStream = new DataInputStream(this.inputStream);</span>
+<span class="fc" id="L54">      this.outputStream = this.clientSocket.getOutputStream();</span>
+<span class="nc" id="L55">    } catch (IOException e) {</span>
+<span class="nc" id="L56">      throw new RuntimeException(e);</span>
+<span class="fc" id="L57">    }</span>
+<span class="fc" id="L58">    this.messageHandler = new MessageHandler();</span>
+<span class="fc" id="L59">    this.usersSocketManager = usersSocketManager;</span>
+
+<span class="fc" id="L61">  }</span>
+
+  /**
+   * If connect success, add client to connected users database server continue handle new messages until server stop
+   */
+  @Override
+  public void run() {
+<span class="fc bfc" id="L68" title="All 2 branches covered.">    if (connect()) {</span>
+<span class="nc" id="L69">      handleMessages();</span>
+    }
+    try {
+<span class="fc" id="L72">      this.clientSocket.close();</span>
+<span class="nc" id="L73">    } catch (IOException e) {</span>
+<span class="nc" id="L74">      throw new RuntimeException(e);</span>
+<span class="fc" id="L75">    }</span>
+<span class="fc" id="L76">    System.out.println(clientName+&quot; exited from the chat room&quot;);</span>
+<span class="fc" id="L77">  }</span>
+
+  /**
+   * Continue handle new messages if receive a disconnect message, server will end this client connection thread.
+   */
+  public void handleMessages() {
+    try {
+<span class="fc" id="L84">      int identifier = INIT_IDENTIFIER;</span>
+<span class="fc bfc" id="L85" title="All 4 branches covered.">      while (true &amp; identifier != DISCONNECT_MESSAGE) {</span>
+<span class="fc bfc" id="L86" title="All 2 branches covered.">        if (dataInputStream.available() &lt;= 0) {</span>
+<span class="fc" id="L87">          continue;</span>
+        }
+<span class="fc" id="L89">        System.out.println(SERVER_NAME + &quot; received a message:&quot;);</span>
+
+<span class="fc" id="L91">        identifier = dataInputStream.readInt();</span>
+<span class="fc" id="L92">        execute(identifier, dataInputStream);</span>
+      }
+<span class="nc" id="L94">    } catch (IOException e) {</span>
+<span class="nc" id="L95">      throw new RuntimeException(e);</span>
+<span class="fc" id="L96">    }</span>
+<span class="fc" id="L97">  }</span>
+
+  /**
+   * Wait until receive connect message send connect response
+   * @return if connect success
+   */
+  public boolean connect() {
+<span class="fc" id="L104">    boolean success = false;</span>
+    try {
+<span class="fc" id="L106">      String responseMsg = &quot;should be a connect response&quot;;</span>
+      while (true) {
+<span class="fc bfc" id="L108" title="All 2 branches covered.">        if (dataInputStream.available() &gt; 0) {</span>
+<span class="fc" id="L109">          break;</span>
+        }
+      }
+
+<span class="fc" id="L113">      int identifier = dataInputStream.readInt();</span>
+<span class="fc bfc" id="L114" title="All 2 branches covered.">      if (identifier != CONNECT_MESSAGE) {</span>
+<span class="fc" id="L115">        responseMsg = &quot;Connect failed, did not send a valid connect message&quot;;</span>
+<span class="fc" id="L116">        Message fail = messageHandler.createFail(responseMsg);</span>
+<span class="fc" id="L117">        send(fail);</span>
+<span class="fc" id="L118">        return false;</span>
+      }
+
+<span class="fc" id="L121">      ConnectMessage connectMessage = new ConnectMessage();</span>
+<span class="fc" id="L122">      System.out.println(connectMessage.deserialize(dataInputStream));</span>
+<span class="fc" id="L123">      this.clientName = connectMessage.getUsername();</span>
+
+<span class="fc bfc" id="L125" title="All 2 branches covered.">      if (this.usersSocketManager.contains(clientName)) {</span>
+<span class="fc" id="L126">        responseMsg = String.format(</span>
+            &quot;you were already connected, there are %d other connected clients&quot;,
+<span class="fc" id="L128">            usersSocketManager.queryNum());</span>
+<span class="fc" id="L129">        success = false;</span>
+      }
+<span class="pc bpc" id="L131" title="1 of 2 branches missed.">      else if (this.usersSocketManager.add(clientName, clientSocket)) {</span>
+<span class="fc" id="L132">        responseMsg = String.format(</span>
+            &quot;Connect was successful, there are %d other connected clients&quot;,
+<span class="fc" id="L134">            usersSocketManager.queryNum());</span>
+<span class="fc" id="L135">        success = true;</span>
+      } else{
+<span class="nc" id="L137">        responseMsg = String.format(&quot;Connect failed, there are up to %d other connected clients&quot;,</span>
+<span class="nc" id="L138">            usersSocketManager.queryNum());</span>
+<span class="nc" id="L139">        success = false;</span>
+      }
+
+<span class="fc bfc" id="L142" title="All 2 branches covered.">      if(success){</span>
+<span class="fc" id="L143">      Message response = messageHandler.createResponse(success, responseMsg);</span>
+<span class="fc" id="L144">      send(response);}</span>
+      else {
+<span class="fc" id="L146">        Message fail  = messageHandler.createFail(responseMsg);</span>
+<span class="fc" id="L147">        send(fail);</span>
+      }
+
+<span class="nc" id="L150">    } catch (IOException ex) {</span>
+<span class="nc" id="L151">      throw new RuntimeException(ex);</span>
+<span class="fc" id="L152">    }</span>
+<span class="fc" id="L153">    return success;</span>
+  }
+
+  /**
+   * Disconnect with client remove client socket from connected users hashmap,
+   * stop socket communicate and quit client connection thread
+   * @return if connect success
+   */
+  private boolean disconnect() {
+<span class="fc" id="L162">    boolean success = true;</span>
+<span class="fc" id="L163">    String responseStr = &quot;You are no longer connected&quot;;</span>
+<span class="pc bpc" id="L164" title="1 of 2 branches missed.">    if (!usersSocketManager.remove(clientName)) {</span>
+<span class="nc" id="L165">      success = false;</span>
+<span class="nc" id="L166">      responseStr = &quot;Disconnect failed, You were not connected&quot;;</span>
+    }
+<span class="fc" id="L168">    Message disconnectResponse = messageHandler.createResponse(success, responseStr);</span>
+<span class="fc" id="L169">    send(disconnectResponse);</span>
+<span class="fc" id="L170">    return success;</span>
+  }
+
+  /**
+   * Handle different messages request from client given message type and input stream
+   * execute different requests like query, direct, or broadcast generate response messages and send back to client
+   * @param identifier the identifier of the message
+   * @param dataInputStream the input stream from which to read to message data
+   */
+  private void execute(int identifier, DataInputStream dataInputStream) {
+<span class="fc" id="L180">    String responseMsgStr = null;</span>
+
+<span class="fc bfc" id="L182" title="All 2 branches covered.">    if (identifier == DISCONNECT_MESSAGE) {</span>
+<span class="fc" id="L183">      DisconnectMessage disconnectMessage = new DisconnectMessage();</span>
+<span class="fc" id="L184">      System.out.println(disconnectMessage.deserialize(dataInputStream));</span>
+<span class="fc" id="L185">      disconnect();</span>
+<span class="fc" id="L186">    }</span>
+<span class="fc bfc" id="L187" title="All 2 branches covered.">    else if (identifier == QUERY_CONNECTED_USERS) {</span>
+<span class="fc" id="L188">      QueryUsersMessage queryUsersMessage = new QueryUsersMessage();</span>
+<span class="fc" id="L189">      System.out.println(queryUsersMessage.deserialize(dataInputStream));</span>
+<span class="fc" id="L190">      Message responseMsg = messageHandler.createResponse(this.usersSocketManager.queryAll());</span>
+<span class="fc" id="L191">      send(responseMsg);</span>
+<span class="fc" id="L192">    }</span>
+<span class="fc bfc" id="L193" title="All 2 branches covered.">    else if (identifier == DIRECT_MESSAGE) {</span>
+<span class="fc" id="L194">      DirectMessage directMessage = new DirectMessage();</span>
+<span class="fc" id="L195">      System.out.println(directMessage.deserialize(dataInputStream));</span>
+<span class="fc" id="L196">      responseMsgStr = send(directMessage.getRecipientUsername(), directMessage);</span>
+<span class="fc" id="L197">    }</span>
+<span class="fc bfc" id="L198" title="All 2 branches covered.">    else if (identifier == SEND_INSULT) {</span>
+<span class="fc" id="L199">      InsultMessage insultMessage = new InsultMessage();</span>
+<span class="fc" id="L200">      System.out.println(insultMessage.deserialize(dataInputStream));</span>
+<span class="fc" id="L201">      responseMsgStr = sendInsult(insultMessage);</span>
+<span class="fc" id="L202">    }</span>
+<span class="pc bpc" id="L203" title="1 of 2 branches missed.">    else if (identifier == BROADCAST_MESSAGE) {</span>
+<span class="fc" id="L204">      BroadcastMessage broadcastMessage = new BroadcastMessage();</span>
+<span class="fc" id="L205">      System.out.println(broadcastMessage.deserialize(dataInputStream));</span>
+<span class="fc" id="L206">      responseMsgStr = broadcast(broadcastMessage);</span>
+    }
+
+<span class="pc bpc" id="L209" title="1 of 2 branches missed.">    if (responseMsgStr != null) {</span>
+<span class="nc" id="L210">      Message responseMsg = messageHandler.createFail(responseMsgStr);</span>
+<span class="nc" id="L211">      send(responseMsg);</span>
+    }
+<span class="fc" id="L213">  }</span>
+
+  /**
+   * Broadcast message to all clients and generate a result message
+   * @param boardcastMessage  the message to be broadcast
+   * @return  the message
+   */
+  private String broadcast(Message boardcastMessage) {
+<span class="pc bpc" id="L221" title="1 of 2 branches missed.">    if (!usersSocketManager.contains(clientName)) {</span>
+<span class="nc" id="L222">      return &quot;send failed, the sender username is invalid&quot;;</span>
+    }
+<span class="fc" id="L224">    Iterator iterator = usersSocketManager.queryAll().iterator();</span>
+<span class="fc bfc" id="L225" title="All 2 branches covered.">    while (iterator.hasNext()) {</span>
+<span class="fc" id="L226">      send((String) iterator.next(), boardcastMessage);</span>
+    }
+<span class="fc" id="L228">    return null;</span>
+  }
+
+  /**
+   * Send back a response to client generate a result message
+   * @param Message the message
+   * @return  true if the message send
+   */
+  private boolean send(Message Message) {
+<span class="fc" id="L237">    System.out.println(SERVER_NAME + &quot; sending a response to &quot; + clientName);</span>
+<span class="fc" id="L238">    System.out.println(Message.toString());</span>
+
+<span class="fc" id="L240">    byte[] byteMessage = Message.serialize();</span>
+    try {
+<span class="fc" id="L242">      this.outputStream.write(byteMessage);</span>
+<span class="nc" id="L243">    } catch (IOException e) {</span>
+<span class="nc" id="L244">      throw new RuntimeException(e);</span>
+<span class="fc" id="L245">    }</span>
+<span class="fc" id="L246">    return true;</span>
+  }
+
+  /**
+   * Send a message to another clients generate a result message
+   * @param recipient the recipient client
+   * @param sendMsg the send message
+   * @return  the message send if true
+   */
+  private String send(String recipient, Message sendMsg) {
+
+<span class="pc bpc" id="L257" title="1 of 2 branches missed.">    if (!usersSocketManager.contains(clientName)) {</span>
+<span class="nc" id="L258">      return &quot;send failed, the sender username is invalid&quot;;</span>
+    }
+<span class="pc bpc" id="L260" title="1 of 2 branches missed.">    if (!usersSocketManager.contains(recipient)) {</span>
+<span class="nc" id="L261">      return &quot;send failed, did not find recipient &quot; + recipient;</span>
+    }
+<span class="fc" id="L263">    byte[] byteMessage = sendMsg.serialize();</span>
+    try {
+<span class="fc" id="L265">      OutputStream recipientOutputStream = usersSocketManager.getSocket(recipient)</span>
+<span class="fc" id="L266">          .getOutputStream();</span>
+<span class="fc" id="L267">      recipientOutputStream.write(byteMessage);</span>
+<span class="fc" id="L268">      recipientOutputStream.flush();</span>
+<span class="fc" id="L269">      System.out.println(SERVER_NAME + &quot; sending a message to &quot; + recipient);</span>
+<span class="nc" id="L270">    } catch (IOException e) {</span>
+<span class="nc" id="L271">      throw new RuntimeException(e);</span>
+<span class="fc" id="L272">    }</span>
+<span class="fc" id="L273">    return null;</span>
+  }
+
+  /**
+   * Send an insult to another client generate a result message
+   * @param insultMsg the insult message to be sent
+   * @return  the message if is true
+   */
+  private String sendInsult(InsultMessage insultMsg) {
+<span class="fc" id="L282">    String insultStr = RandomInsultGenerator.generate();</span>
+<span class="fc" id="L283">    System.out.println(SERVER_NAME + &quot; generate Insult: &quot; + insultStr);</span>
+<span class="fc" id="L284">    insultMsg.setMessage(insultStr);</span>
+<span class="fc" id="L285">    return send(insultMsg.getRecipientUsername(), insultMsg);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

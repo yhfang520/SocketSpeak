@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FailMessage.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SocketSpeak</a> &gt; <a href="index.source.html" class="el_package">Message</a> &gt; <span class="el_source">FailMessage.java</span></div><h1>FailMessage.java</h1><pre class="source lang-java linenums">package Message;
+
+import static Message.MessageHardcode.Identifier.FAILED_MESSAGE;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+
+/**
+ * Represents the Failed Message
+ */
+public class FailMessage implements Message{
+  private int identifier;
+  private String message;
+
+  /**
+   * Constructor for FailedMessage
+   */
+<span class="fc" id="L19">  public FailMessage() {</span>
+<span class="fc" id="L20">    this.identifier = FAILED_MESSAGE;</span>
+<span class="fc" id="L21">  }</span>
+
+  /**
+   * Constructor for FailedMessage
+   *
+   * @param message   the message
+   */
+<span class="fc" id="L28">  public FailMessage(String message) {</span>
+<span class="fc" id="L29">    this.identifier = FAILED_MESSAGE;</span>
+<span class="fc" id="L30">    this.message = message;</span>
+<span class="fc" id="L31">  }</span>
+
+  /**
+   * Deserialize the FailMessage from the DataInputStream
+   * @param dataInputStream the input stream
+   * @return deserialize username
+   */
+  @Override
+  public String deserialize(DataInputStream dataInputStream) {
+    try {
+<span class="fc" id="L41">      dataInputStream.readChar();</span>
+<span class="fc" id="L42">      int msgLength = dataInputStream.readInt();</span>
+<span class="fc" id="L43">      dataInputStream.readChar();</span>
+<span class="fc" id="L44">      byte[] buffer = new byte[msgLength];</span>
+<span class="fc" id="L45">      dataInputStream.readFully(buffer);</span>
+<span class="fc" id="L46">      message = new String(buffer, StandardCharsets.UTF_8);</span>
+<span class="nc" id="L47">    } catch (IOException e) {</span>
+<span class="nc" id="L48">      throw new RuntimeException(e);</span>
+<span class="fc" id="L49">    }</span>
+
+
+<span class="fc" id="L52">    return this.toString();</span>
+  }
+
+  /**
+   * Serialize the FailMessage to the byte array
+   * @return byte array
+   */
+  @Override
+  public byte[] serialize() {
+<span class="fc" id="L61">    MessageHandler messageHandler = new MessageHandler();</span>
+<span class="fc" id="L62">    byte[] connectMsg = messageHandler.join(null,this.identifier);</span>
+<span class="fc" id="L63">    return messageHandler.join(connectMsg,message);</span>
+  }
+
+  /**
+   * Get the message
+   * @return the message
+   */
+  public String getMessage() {
+<span class="fc" id="L71">    return message;</span>
+  }
+
+  /**
+   * Get the identifier
+   * @return the identifier
+   */
+  public int getIdentifier() {
+<span class="fc" id="L79">    return this.identifier;</span>
+  }
+
+  /**
+   * Make sure the FailMessage objects are equals
+   * @return true if it's all equal
+   */
+  @Override
+  public boolean equals(Object ob) {
+<span class="fc bfc" id="L88" title="All 2 branches covered.">    if(this == ob) {</span>
+<span class="fc" id="L89">      return true;</span>
+    }
+<span class="pc bpc" id="L91" title="2 of 4 branches missed.">    if(ob == null || getClass() != ob.getClass()) {</span>
+<span class="nc" id="L92">      return false;</span>
+    }
+<span class="fc" id="L94">    FailMessage failMessage = (FailMessage) ob;</span>
+<span class="fc" id="L95">    return Objects.equals(message, failMessage.message);</span>
+  }
+
+  /**
+   * Hash code of the FailMessage object
+   * @return hash code
+   */
+  @Override
+  public int hashCode() {
+<span class="fc" id="L104">    return Objects.hash(message);</span>
+  }
+
+  /**
+   * To string show all the FailMessage's info
+   * @return string
+   */
+  @Override
+  public String toString() {
+<span class="fc" id="L113">    return String.format(&quot;(Fail message) %s&quot;,message);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

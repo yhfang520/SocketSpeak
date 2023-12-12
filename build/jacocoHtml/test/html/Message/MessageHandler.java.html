@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MessageHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SocketSpeak</a> &gt; <a href="index.source.html" class="el_package">Message</a> &gt; <span class="el_source">MessageHandler.java</span></div><h1>MessageHandler.java</h1><pre class="source lang-java linenums">package Message;
+
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+
+import static Message.MessageHardcode.Identifier.*;
+import static Message.MessageHardcode.DELIMITER;
+
+/**
+ * Represents the Message Handler class to create a different types of message
+ */
+public class MessageHandler {
+
+  /**
+   * Constructor for MessageHandler
+   */
+<span class="fc" id="L20">  public MessageHandler() {</span>
+<span class="fc" id="L21">  }</span>
+
+  /**
+   * Create the message based on the identifier
+   * @param identifier the identifier
+   * @return the message or null if the identifier is invalid
+   */
+  public Message create(int identifier) {
+<span class="pc bpc" id="L29" title="1 of 10 branches missed.">    switch (identifier) {</span>
+      case CONNECT_MESSAGE:
+<span class="fc" id="L31">        return (Message) new ConnectMessage();</span>
+      case DISCONNECT_MESSAGE:
+<span class="fc" id="L33">        return (Message) new DisconnectMessage();</span>
+      case QUERY_CONNECTED_USERS:
+<span class="fc" id="L35">        return (Message) new QueryUsersMessage();</span>
+      case DIRECT_MESSAGE:
+<span class="fc" id="L37">        return (Message) new DirectMessage();</span>
+      case BROADCAST_MESSAGE:
+<span class="fc" id="L39">        return (Message) new BroadcastMessage();</span>
+      case SEND_INSULT:
+<span class="fc" id="L41">        return (Message) new InsultMessage();</span>
+      case CONNECT_RESPONSE:
+<span class="fc" id="L43">        return (Message) new ConnectResponse();</span>
+      case QUERY_USER_RESPONSE:
+<span class="fc" id="L45">        return (Message) new QueryUsersResponse();</span>
+      case FAILED_MESSAGE:
+<span class="fc" id="L47">        return (Message) new FailMessage();</span>
+    }
+<span class="nc" id="L49">    return null;</span>
+  }
+
+  /**
+   * Create Connect, Disconnect, Query Message
+   * @param identifier  the identifier
+   * @param username  the user's name
+   * @return the message or null if the identifier is invalid
+   */
+  public Message create(int identifier, String username) {
+<span class="pc bpc" id="L59" title="1 of 4 branches missed.">    switch (identifier) {</span>
+      case CONNECT_MESSAGE:
+<span class="fc" id="L61">        return (Message) new ConnectMessage(username);</span>
+      case DISCONNECT_MESSAGE:
+<span class="fc" id="L63">        return (Message) new DisconnectMessage(username);</span>
+      case QUERY_CONNECTED_USERS:
+<span class="fc" id="L65">        return (Message) new QueryUsersMessage(username);</span>
+    }
+<span class="nc" id="L67">    return null;</span>
+  }
+
+  /**
+   * Create Direct Message or insult message
+   * @param identifier  the identifier
+   * @param senderUsername  the sender username
+   * @param recipientUsername the recipient username
+   * @param message the message
+   * @return the message or null if the identifier is invalid
+   */
+  public Message create(int identifier, String senderUsername, String recipientUsername, String message) {
+<span class="pc bpc" id="L79" title="1 of 3 branches missed.">    switch (identifier){</span>
+      case DIRECT_MESSAGE:
+<span class="fc" id="L81">        return (Message) new DirectMessage(senderUsername, recipientUsername, message);</span>
+      case SEND_INSULT:
+<span class="fc" id="L83">        return (Message) new InsultMessage(senderUsername, recipientUsername, &quot;&quot;);</span>
+    }
+<span class="nc" id="L85">    return null;</span>
+  }
+
+  /**
+   * Create Broadcast Message
+   * @param senderUsername  the sender username
+   * @param message the message
+   * @return the broadcast message
+   */
+  public Message create(String senderUsername, String message) {
+<span class="fc" id="L95">    return (Message) new BroadcastMessage(senderUsername, message);</span>
+  }
+
+  /**
+   * Create Query Response
+   * @param usernames the username
+   * @return the query message
+   */
+  public Message createResponse(ArrayList&lt;String&gt; usernames) {
+<span class="fc" id="L104">    return (Message) new QueryUsersResponse(usernames);</span>
+  }
+
+  /**
+   * Create fail message
+   * @param message the message
+   * @return the fail message
+   */
+  public Message createFail(String message) {
+<span class="fc" id="L113">    return (Message) new FailMessage(message);</span>
+  }
+
+  /**
+   * Create connect, disconnect response using same class
+   * @param success true if it's success
+   * @param message the message
+   * @return the response message
+   */
+  public Message createResponse(boolean success, String message) {
+<span class="fc" id="L123">        return (Message) new ConnectResponse(success, message);</span>
+  }
+
+  /**
+   * Join a variable number of string to origin byte array
+   * @param origin  the original byte array
+   * @param strs varargs (variable-length argument) String
+   * @return  the joined byte array
+   */
+  public byte[] join(byte[] origin, String... strs) {
+<span class="fc" id="L133">    try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();</span>
+<span class="fc" id="L134">        DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream)) {</span>
+
+<span class="fc" id="L136">      dataOutputStream.write(origin);</span>
+<span class="fc bfc" id="L137" title="All 2 branches covered.">      for (int i = 0; i &lt; strs.length; i++) {</span>
+<span class="fc" id="L138">        dataOutputStream.writeChar(DELIMITER);</span>
+<span class="fc" id="L139">        byte[] byteOfStr = strs[i].getBytes(StandardCharsets.UTF_8);</span>
+<span class="fc" id="L140">        dataOutputStream.writeInt(byteOfStr.length);</span>
+<span class="fc" id="L141">        dataOutputStream.writeChar(DELIMITER);</span>
+<span class="fc" id="L142">        dataOutputStream.write(byteOfStr);</span>
+      }
+<span class="fc" id="L144">      byte[] joinMsg = byteArrayOutputStream.toByteArray();</span>
+<span class="fc" id="L145">      return joinMsg;</span>
+
+<span class="nc" id="L147">    } catch (IOException e) {</span>
+<span class="nc" id="L148">      throw new RuntimeException(e);</span>
+    }
+  }
+
+  /**
+   * Join an integer to the original byte array
+   * @param origin  the original byte array
+   * @param num  the number
+   * @return the joined byte array
+   */
+  public byte[] join(byte[] origin, int num) {
+<span class="fc" id="L159">    try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();</span>
+<span class="fc" id="L160">        DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream)) {</span>
+
+<span class="fc bfc" id="L162" title="All 2 branches covered.">      if (origin != null) {</span>
+<span class="fc" id="L163">        dataOutputStream.write(origin);</span>
+<span class="fc" id="L164">        dataOutputStream.writeChar(DELIMITER);</span>
+      }
+<span class="fc" id="L166">      dataOutputStream.writeInt(num);</span>
+
+<span class="fc" id="L168">      return byteArrayOutputStream.toByteArray();</span>
+
+<span class="nc" id="L170">    } catch (IOException e) {</span>
+<span class="nc" id="L171">      throw new RuntimeException(e);</span>
+    }
+  }
+
+  /**
+   * Join a boolean to the original byte array
+   * @param origin  the original byte array
+   * @param bool  the boolean to join
+   * @return the joined byte array
+   */
+  public byte[] join(byte[] origin, boolean bool) {
+<span class="fc" id="L182">    try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();</span>
+<span class="fc" id="L183">        DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream)) {</span>
+
+<span class="fc" id="L185">      dataOutputStream.write(origin);</span>
+<span class="fc" id="L186">      dataOutputStream.writeChar(DELIMITER);</span>
+<span class="fc" id="L187">      dataOutputStream.writeBoolean(bool);</span>
+
+<span class="fc" id="L189">      return byteArrayOutputStream.toByteArray();</span>
+
+<span class="nc" id="L191">    } catch (IOException e) {</span>
+<span class="nc" id="L192">      throw new RuntimeException(e);</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

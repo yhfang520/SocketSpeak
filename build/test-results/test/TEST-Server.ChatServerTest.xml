@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Server.ChatServerTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2023-12-12T03:28:50" hostname="bellas-mbp.lan" time="6.062">
+  <properties/>
+  <testcase name="mainTest()" classname="Server.ChatServerTest" time="2.038"/>
+  <testcase name="startServerTest()" classname="Server.ChatServerTest" time="1.008"/>
+  <testcase name="mainMultipleConnectTest()" classname="Server.ChatServerTest" time="3.014"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[Exception in thread "Thread-4" java.lang.RuntimeException: java.net.SocketException: Socket closed
+	at Client.MockServer.lambda$start$0(MockServer.java:39)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+Caused by: java.net.SocketException: Socket closed
+	at java.base/sun.nio.ch.NioSocketImpl.endAccept(NioSocketImpl.java:689)
+	at java.base/sun.nio.ch.NioSocketImpl.accept(NioSocketImpl.java:762)
+	at java.base/java.net.ServerSocket.implAccept(ServerSocket.java:675)
+	at java.base/java.net.ServerSocket.platformImplAccept(ServerSocket.java:641)
+	at java.base/java.net.ServerSocket.implAccept(ServerSocket.java:617)
+	at java.base/java.net.ServerSocket.implAccept(ServerSocket.java:574)
+	at java.base/java.net.ServerSocket.accept(ServerSocket.java:532)
+	at Client.MockServer.lambda$start$0(MockServer.java:35)
+	... 1 more
+Exception in thread "Thread-7" java.lang.RuntimeException: java.net.SocketException: Socket closed
+	at Client.MockServer.lambda$start$0(MockServer.java:39)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+Caused by: java.net.SocketException: Socket closed
+	at java.base/sun.nio.ch.NioSocketImpl.endAccept(NioSocketImpl.java:689)
+	at java.base/sun.nio.ch.NioSocketImpl.accept(NioSocketImpl.java:762)
+	at java.base/java.net.ServerSocket.implAccept(ServerSocket.java:675)
+	at java.base/java.net.ServerSocket.platformImplAccept(ServerSocket.java:641)
+	at java.base/java.net.ServerSocket.implAccept(ServerSocket.java:617)
+	at java.base/java.net.ServerSocket.implAccept(ServerSocket.java:574)
+	at java.base/java.net.ServerSocket.accept(ServerSocket.java:532)
+	at Client.MockServer.lambda$start$0(MockServer.java:35)
+	... 1 more
+Exception in thread "Thread-9" java.lang.RuntimeException: java.net.SocketException: Socket closed
+	at Client.MockServer.lambda$start$0(MockServer.java:39)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+Caused by: java.net.SocketException: Socket closed
+	at java.base/sun.nio.ch.NioSocketImpl.endAccept(NioSocketImpl.java:689)
+	at java.base/sun.nio.ch.NioSocketImpl.accept(NioSocketImpl.java:762)
+	at java.base/java.net.ServerSocket.implAccept(ServerSocket.java:675)
+	at java.base/java.net.ServerSocket.platformImplAccept(ServerSocket.java:641)
+	at java.base/java.net.ServerSocket.implAccept(ServerSocket.java:617)
+	at java.base/java.net.ServerSocket.implAccept(ServerSocket.java:574)
+	at java.base/java.net.ServerSocket.accept(ServerSocket.java:532)
+	at Client.MockServer.lambda$start$0(MockServer.java:35)
+	... 1 more
+]]></system-err>
+</testsuite>

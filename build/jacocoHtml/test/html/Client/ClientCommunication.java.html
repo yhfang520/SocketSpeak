@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ClientCommunication.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SocketSpeak</a> &gt; <a href="index.source.html" class="el_package">Client</a> &gt; <span class="el_source">ClientCommunication.java</span></div><h1>ClientCommunication.java</h1><pre class="source lang-java linenums">package Client;
+
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.util.Scanner;
+import java.util.regex.Matcher;
+
+import Message.*;
+
+
+import static Client.UserCommands.INSULT;
+import static Client.UserCommands.INSULT_SYMBOL;
+import static Client.UserCommands.LOGOFF;
+import static Client.UserCommands.WHO;
+import static Message.MessageHardcode.Identifier.CONNECT_MESSAGE;
+
+import static Client.UserCommands.HELP;
+import static Client.UserCommands.COMMAND_PATTERNS;
+
+import static Client.UserCommands.DIRECT;
+import static Client.UserCommands.DIRECT_SYMBOL;
+import static Client.UserCommands.BROADCAST;
+import static Message.MessageHardcode.Identifier.*;
+
+/**
+ * Represents the client side communication each user will create and launch a client communication thread
+ * to communicate with server using socket
+ */
+public class ClientCommunication implements Runnable {
+
+  private Socket clientSocket;
+  private String username;
+  private InputStream inputStream;
+  private OutputStream outputStream;
+  private DataInputStream dataInputStream;
+  private MessageHandler messageHandler;
+  private static String CLIENT_CHAT_NAME;
+<span class="fc" id="L41">  private boolean connected = false;</span>
+
+  /**
+   * Constructor for ClientCommunication, create a client communication thread with client socket
+   *
+   * @param clientSocket    the socket for communication with server
+   * @param username        the client's username
+   */
+<span class="fc" id="L49">  public ClientCommunication(Socket clientSocket, String username) {</span>
+<span class="fc" id="L50">    this.clientSocket = clientSocket;</span>
+<span class="fc" id="L51">    this.username = username;</span>
+<span class="fc" id="L52">    CLIENT_CHAT_NAME = String.format(&quot;[%s Chat]&quot;, username);</span>
+<span class="fc" id="L53">    this.messageHandler = new MessageHandler();</span>
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">    if (clientSocket != null) {</span>
+      try {
+<span class="fc" id="L56">        this.inputStream = this.clientSocket.getInputStream();</span>
+<span class="fc" id="L57">        this.outputStream = this.clientSocket.getOutputStream();</span>
+<span class="fc" id="L58">        this.dataInputStream = new DataInputStream(this.inputStream);</span>
+
+<span class="nc" id="L60">      } catch (IOException e) {</span>
+<span class="nc" id="L61">        throw new RuntimeException(e);</span>
+<span class="fc" id="L62">      }</span>
+    }
+<span class="fc" id="L64">  }</span>
+
+  /**
+   * If connect is successful continue handle user commands util disconnect
+   */
+  @Override
+  public void run() {
+<span class="fc" id="L71">    connect();</span>
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">    if (connected) {</span>
+<span class="fc" id="L73">      System.out.println(&quot;connection start&quot;);</span>
+<span class="fc" id="L74">      keepCommunicating(new Scanner(System.in));</span>
+    }
+<span class="fc" id="L76">    System.out.println(&quot;connection stop&quot;);</span>
+<span class="fc" id="L77">  }</span>
+
+  /**
+   * Check is connected
+   * @return if connected
+   */
+  public boolean isConnected() {
+<span class="fc" id="L84">    return connected;</span>
+  }
+
+  /**
+   * Connect to server and wait for a connect response. If connect is successful, modify connected state to true,
+   * then start handle further user input and messages. Otherwise chat thread quit
+   */
+  private void connect() {
+<span class="fc" id="L92">    Message connectMessage = messageHandler.create(CONNECT_MESSAGE, this.username);</span>
+<span class="fc" id="L93">    send(connectMessage);</span>
+<span class="fc" id="L94">    waitUntilResponse();</span>
+<span class="fc" id="L95">    handleNewMessages();</span>
+<span class="fc" id="L96">  }</span>
+
+
+  /**
+   * Continue handle user commands and messages util disconnect
+   * @param scanner the scanner
+   */
+  public void keepCommunicating(Scanner scanner) {
+<span class="pc bpc" id="L104" title="1 of 2 branches missed.">    if(scanner==null) {scanner = new Scanner(System.in);}</span>
+    try {
+<span class="fc bfc" id="L106" title="All 2 branches covered.">      while (connected) {</span>
+<span class="pc bpc" id="L107" title="1 of 2 branches missed.">        if (System.in.available() &gt; 0) {</span>
+<span class="nc" id="L108">          String userInput = scanner.nextLine().trim();</span>
+<span class="nc" id="L109">          Message sendMessage = parseCommand(userInput);</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">          if (sendMessage!=null){</span>
+<span class="nc" id="L111">            send(sendMessage);</span>
+          }
+        }
+<span class="fc" id="L114">        handleNewMessages();</span>
+      }
+<span class="fc" id="L116">    } catch (IOException e) {</span>
+<span class="fc" id="L117">      throw new RuntimeException(e);</span>
+    }finally {
+<span class="fc" id="L119">      scanner.close();</span>
+    }
+<span class="fc" id="L121">  }</span>
+
+  /**
+   * Check and parse valid userInput into protocol message
+   * @param userInput the user's input
+   * @return  the parsed message
+   */
+  public Message parseCommand(String userInput) {
+<span class="fc bfc" id="L129" title="All 2 branches covered.">    if (userInput.equals(HELP)) {</span>
+<span class="fc" id="L130">      System.out.println(&quot;match command &quot; + HELP);</span>
+<span class="fc" id="L131">      showAllUserCommands();</span>
+<span class="fc" id="L132">      return null;</span>
+    }
+
+<span class="fc" id="L135">    Matcher matcher = COMMAND_PATTERNS.matcher(userInput);</span>
+
+<span class="fc bfc" id="L137" title="All 2 branches covered.">    if (!matcher.find()) {</span>
+<span class="fc" id="L138">      reportUnknownMessageError(userInput);</span>
+<span class="fc" id="L139">      return null;</span>
+    }
+
+<span class="fc" id="L142">    Message message = null;</span>
+<span class="fc" id="L143">    String command = matcher.group();</span>
+<span class="fc" id="L144">    int restIndex = matcher.end();</span>
+<span class="fc bfc" id="L145" title="All 2 branches covered.">    if (command.matches(LOGOFF)) {</span>
+<span class="fc" id="L146">      message = messageHandler.create(DISCONNECT_MESSAGE, username);</span>
+    }
+<span class="fc bfc" id="L148" title="All 2 branches covered.">    if (command.matches(WHO)) {</span>
+<span class="fc" id="L149">      message = messageHandler.create(QUERY_CONNECTED_USERS, username);</span>
+    }
+<span class="fc bfc" id="L151" title="All 2 branches covered.">    if (command.matches(DIRECT)) {</span>
+<span class="fc" id="L152">      String recipientName = command.replace(DIRECT_SYMBOL, &quot;&quot;);</span>
+<span class="fc" id="L153">      String messageStr = userInput.substring(restIndex).trim();</span>
+<span class="fc" id="L154">      message = messageHandler.create(DIRECT_MESSAGE, username, recipientName, messageStr);</span>
+    }
+<span class="fc bfc" id="L156" title="All 2 branches covered.">    if (command.matches(INSULT)) {</span>
+<span class="fc" id="L157">      String recipientName = command.replace(INSULT_SYMBOL, &quot;&quot;);</span>
+<span class="fc" id="L158">      String messageStr = userInput.substring(restIndex).trim();</span>
+<span class="fc" id="L159">      message = messageHandler.create(SEND_INSULT, username, recipientName, messageStr);</span>
+    }
+<span class="fc bfc" id="L161" title="All 2 branches covered.">    if (command.matches(BROADCAST)) {</span>
+<span class="fc" id="L162">      String messageStr = userInput.substring(restIndex).trim();</span>
+<span class="fc" id="L163">      message = messageHandler.create(username, messageStr);</span>
+    }
+<span class="fc" id="L165">    return message;</span>
+  }
+
+  /**
+   * Check if there are new messages or responses from server handle received messages from server
+   * modify connected state given connect response
+   */
+  private void handleNewMessages() {
+    try {
+<span class="fc bfc" id="L174" title="All 2 branches covered.">      while (dataInputStream.available() &gt; 0) {</span>
+<span class="fc" id="L175">        System.out.println(CLIENT_CHAT_NAME + &quot; receive a response:&quot;);</span>
+
+<span class="fc" id="L177">        int responseId = dataInputStream.readInt();</span>
+<span class="fc" id="L178">        Message response = messageHandler.create(responseId);</span>
+<span class="fc" id="L179">        System.out.println(response.deserialize(dataInputStream));</span>
+<span class="fc" id="L180">        shouldModifyConnect(responseId, response);</span>
+<span class="fc" id="L181">      }</span>
+<span class="nc" id="L182">    } catch (IOException e) {</span>
+<span class="nc" id="L183">      throw new RuntimeException(e);</span>
+<span class="fc" id="L184">    }</span>
+<span class="fc" id="L185">  }</span>
+
+  /**
+   * Wait until receive a response
+   */
+  private void waitUntilResponse() {
+
+    try {
+      while (true) {
+<span class="fc bfc" id="L194" title="All 2 branches covered.">        if (dataInputStream.available() &gt; 0) {</span>
+<span class="fc" id="L195">          break;</span>
+        }
+      }
+
+<span class="nc" id="L199">    } catch (IOException e) {</span>
+<span class="nc" id="L200">      throw new RuntimeException(e);</span>
+<span class="fc" id="L201">    }</span>
+<span class="fc" id="L202">  }</span>
+
+  /**
+   * Modify connected state given connect response.
+   * If not connected and connected response is true, connected state = true
+   * If connected and disconnected response is true, connected state = false
+   * @param responseId  the identifier of the response
+   * @param response  the response message
+   */
+  public void shouldModifyConnect(int responseId, Message response) {
+<span class="pc bpc" id="L212" title="1 of 2 branches missed.">    if (responseId == CONNECT_RESPONSE) {</span>
+<span class="fc bfc" id="L213" title="All 2 branches covered.">      if (!connected) {</span>
+<span class="fc" id="L214">        this.connected = ((ConnectResponse) response).isSuccess();</span>
+      } else {
+<span class="pc bpc" id="L216" title="1 of 2 branches missed.">        this.connected = !((ConnectResponse) response).isSuccess();</span>
+      }
+    }
+
+<span class="fc" id="L220">  }</span>
+
+  /**
+   * Send message to connected chat server
+   * @param message the send message
+   */
+  private void send(Message message) {
+<span class="fc" id="L227">    byte[] byteMessage = message.serialize();</span>
+<span class="fc" id="L228">    System.out.println(message.toString());</span>
+    try {
+<span class="fc" id="L230">      this.outputStream.write(byteMessage);</span>
+<span class="nc" id="L231">    } catch (IOException e) {</span>
+<span class="nc" id="L232">      throw new RuntimeException(e);</span>
+<span class="fc" id="L233">    }</span>
+<span class="fc" id="L234">    System.out.println(CLIENT_CHAT_NAME + &quot; message is sending&quot;);</span>
+<span class="fc" id="L235">  }</span>
+
+  /**
+   * Display the commands menu
+   */
+  private void showAllUserCommands() {
+<span class="fc" id="L241">    System.out.println(&quot;Commands menu: &quot;);</span>
+<span class="fc" id="L242">    System.out.println(&quot;?: display the commands menu&quot;);</span>
+<span class="fc" id="L243">    System.out.println(&quot;logoff: log off&quot;);</span>
+<span class="fc" id="L244">    System.out.println(&quot;who: query connected users&quot;);</span>
+<span class="fc" id="L245">    System.out.println(&quot;@user: sends a DIRECT_MESSAGE to the specified user&quot;);</span>
+<span class="fc" id="L246">    System.out.println(&quot;@all: sends a BROADCAST_MESSAGE to all users&quot;);</span>
+<span class="fc" id="L247">    System.out.println(&quot;!user: sends a SEND_INSULT message to the specified user&quot;);</span>
+<span class="fc" id="L248">  }</span>
+
+  /**
+   * Report unknown message error
+   * @param userInput the users input
+   */
+  private void reportUnknownMessageError(String userInput) {
+<span class="fc" id="L255">    System.out.println(String.format(&quot;\&quot;%s\&quot; is not valid command, please use following commands&quot;,userInput));</span>
+<span class="fc" id="L256">    showAllUserCommands();</span>
+<span class="fc" id="L257">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>QueryUsersResponse.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SocketSpeak</a> &gt; <a href="index.source.html" class="el_package">Message</a> &gt; <span class="el_source">QueryUsersResponse.java</span></div><h1>QueryUsersResponse.java</h1><pre class="source lang-java linenums">package Message;
+
+import static Message.MessageHardcode.Identifier.QUERY_USER_RESPONSE;
+
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Objects;
+
+/**
+ * Represents the Query Users Response
+ */
+public class QueryUsersResponse implements Message {
+
+  private int identifier;
+  private ArrayList&lt;String&gt; usernames;
+
+  /**
+   * Constructor for QueryUsersResponse
+   */
+<span class="fc" id="L22">  public QueryUsersResponse() {</span>
+<span class="fc" id="L23">    this.identifier = QUERY_USER_RESPONSE;</span>
+<span class="fc" id="L24">    this.usernames = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L25">  }</span>
+
+  /**
+   * Constructor for QueryUsersResponse
+   *
+   * @param usernames  the user's name
+   */
+<span class="fc" id="L32">  public QueryUsersResponse(ArrayList&lt;String&gt; usernames) {</span>
+<span class="fc" id="L33">    this.identifier = QUERY_USER_RESPONSE;</span>
+<span class="fc" id="L34">    this.usernames = usernames;</span>
+<span class="fc" id="L35">  }</span>
+
+  /**
+   * Deserialize the QueryUsersResponse from the DataInputStream
+   * @param dataInputStream the input stream
+   * @return deserialize username
+   */
+  @Override
+  public String deserialize(DataInputStream dataInputStream) {
+    try {
+<span class="fc" id="L45">      dataInputStream.readChar();</span>
+<span class="fc" id="L46">      int numberOfUsers = dataInputStream.readInt();</span>
+
+<span class="fc bfc" id="L48" title="All 2 branches covered.">      for (int i = 0; i &lt; numberOfUsers; i++) {</span>
+<span class="fc" id="L49">        dataInputStream.readChar();</span>
+<span class="fc" id="L50">        int userNameLength = dataInputStream.readInt();</span>
+<span class="fc" id="L51">        dataInputStream.readChar();</span>
+<span class="fc" id="L52">        byte[] buffer = new byte[userNameLength];</span>
+<span class="fc" id="L53">        dataInputStream.readFully(buffer);</span>
+<span class="fc" id="L54">        String username = new String(buffer, StandardCharsets.UTF_8);</span>
+<span class="fc" id="L55">        this.usernames.add(username);</span>
+      }
+<span class="fc" id="L57">    } catch (IOException e) {</span>
+<span class="fc" id="L58">      throw new RuntimeException(e);</span>
+<span class="fc" id="L59">    }</span>
+<span class="fc" id="L60">    return this.toString();</span>
+  }
+
+  /**
+   * Serialize the QueryUsersResponse to the byte array
+   * @return byte array
+   */
+  @Override
+  public byte[] serialize() {
+<span class="fc" id="L69">    MessageHandler messageHandler = new MessageHandler();</span>
+<span class="fc" id="L70">    byte[] queryResponse = messageHandler.join(null, this.identifier);</span>
+<span class="fc" id="L71">    queryResponse = messageHandler.join(queryResponse, getNumberOfUsers());</span>
+
+<span class="fc" id="L73">    queryResponse = messageHandler.join(queryResponse,usernames.toArray(new String[0]));</span>
+<span class="fc" id="L74">    return queryResponse;</span>
+  }
+
+  /**
+   * Get the identifier
+   * @return the identifier
+   */
+  @Override
+  public int getIdentifier() {
+<span class="fc" id="L83">    return identifier;</span>
+  }
+
+  /**
+   * Get the number of users
+   * @return the number of users
+   */
+  public int getNumberOfUsers() {
+<span class="fc" id="L91">    return this.usernames.size();</span>
+  }
+
+  /**
+   * Make sure the QueryUsersResponse objects are equals
+   * @return true if it's all equal
+   */
+  @Override
+  public boolean equals(Object ob) {
+<span class="fc bfc" id="L100" title="All 2 branches covered.">    if(this == ob) {</span>
+<span class="fc" id="L101">      return true;</span>
+    }
+<span class="fc bfc" id="L103" title="All 4 branches covered.">    if(ob == null || getClass() != ob.getClass()) {</span>
+<span class="fc" id="L104">      return false;</span>
+    }
+<span class="fc" id="L106">    QueryUsersResponse queryUsersResponse = (QueryUsersResponse) ob;</span>
+<span class="fc" id="L107">    return Objects.equals(usernames, queryUsersResponse.usernames);</span>
+  }
+
+  /**
+   * Hash code of the QueryUsersResponse object
+   * @return hash code
+   */
+  @Override
+  public int hashCode() {
+<span class="fc" id="L116">    return Objects.hash(usernames);</span>
+  }
+
+  /**
+   * To string show all the QueryUsersResponse's info
+   * @return all connected users
+   */
+  @Override
+  public String toString() {
+<span class="fc" id="L125">    return String.format(&quot;(Query Response) %d users found:\n&quot;+</span>
+<span class="fc" id="L126">            String.join(&quot;\n&quot;,usernames.toArray(new String[0])), getNumberOfUsers());</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

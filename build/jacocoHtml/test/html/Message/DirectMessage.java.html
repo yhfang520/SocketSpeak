@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DirectMessage.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">SocketSpeak</a> &gt; <a href="index.source.html" class="el_package">Message</a> &gt; <span class="el_source">DirectMessage.java</span></div><h1>DirectMessage.java</h1><pre class="source lang-java linenums">package Message;
+
+import static Message.MessageHardcode.Identifier.DIRECT_MESSAGE;
+import static Message.MessageHardcode.DELIMITER;
+
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+
+/**
+ * Represents the Direct Message
+ */
+public class DirectMessage implements Message{
+
+  private int identifier;
+  private String senderUsername;
+  private String recipientUsername;
+  private String message;
+
+  /**
+   * Constructor for DirectMessage
+   */
+<span class="fc" id="L26">  public DirectMessage() {</span>
+<span class="fc" id="L27">    this.identifier = DIRECT_MESSAGE;</span>
+<span class="fc" id="L28">  }</span>
+
+  /**
+   * Constructor for DirectMessage
+   *
+   * @param senderUsername      the sender username
+   * @param recipientUsername   the recipient username
+   * @param message             the message
+   */
+<span class="fc" id="L37">  public DirectMessage(String senderUsername, String recipientUsername, String message) {</span>
+<span class="fc" id="L38">    this.identifier = DIRECT_MESSAGE;</span>
+<span class="fc" id="L39">    this.senderUsername = senderUsername;</span>
+<span class="fc" id="L40">    this.recipientUsername = recipientUsername;</span>
+<span class="fc" id="L41">    this.message = message;</span>
+<span class="fc" id="L42">  }</span>
+
+  /**
+   * Serialize the DirectMessage to the byte array
+   * @return byte array
+   */
+  @Override
+  public byte[] serialize(){
+<span class="fc" id="L50">    MessageHandler messageHandler = new MessageHandler();</span>
+<span class="fc" id="L51">    byte[] header = messageHandler.join(null,getIdentifier());</span>
+<span class="fc" id="L52">    return messageHandler.join(header,getUsername(),getRecipientUsername(),getMessage());</span>
+  }
+
+  /**
+   * Deserialize the DirectMessage from the DataInputStream
+   * @param dataInputStream the input stream
+   * @return deserialize username
+   */
+  @Override
+  public String deserialize(DataInputStream dataInputStream){
+    try {
+<span class="fc" id="L63">      dataInputStream.readChar();</span>
+
+<span class="fc" id="L65">      int senderNameLength  = dataInputStream.readInt();</span>
+<span class="fc" id="L66">      dataInputStream.readChar();</span>
+<span class="fc" id="L67">      byte[] buffer = new byte[senderNameLength];</span>
+<span class="fc" id="L68">      dataInputStream.readFully(buffer);</span>
+<span class="fc" id="L69">      setSenderUsername(new String(buffer, StandardCharsets.UTF_8));</span>
+<span class="fc" id="L70">      dataInputStream.readChar();</span>
+
+<span class="fc" id="L72">      int recipientNameLength  = dataInputStream.readInt();</span>
+<span class="fc" id="L73">      dataInputStream.readChar();</span>
+<span class="fc" id="L74">      buffer = new byte[recipientNameLength];</span>
+<span class="fc" id="L75">      dataInputStream.readFully(buffer);</span>
+<span class="fc" id="L76">      setRecipientUsername(new String(buffer, StandardCharsets.UTF_8));</span>
+<span class="fc" id="L77">      dataInputStream.readChar();</span>
+
+<span class="fc" id="L79">      int msgLength  = dataInputStream.readInt();</span>
+<span class="fc" id="L80">      dataInputStream.readChar();</span>
+<span class="fc" id="L81">      buffer = new byte[msgLength];</span>
+<span class="fc" id="L82">      dataInputStream.readFully(buffer);</span>
+<span class="fc" id="L83">      setMessage(new String(buffer, StandardCharsets.UTF_8));</span>
+
+<span class="fc" id="L85">      return this.toString();</span>
+
+<span class="fc" id="L87">    } catch (IOException e) {</span>
+<span class="fc" id="L88">      throw new RuntimeException(e);</span>
+    }
+  }
+
+  /**
+   * Serialize sequential
+   * @return byte direct message
+   */
+  public byte[] serializeSequential(){
+<span class="fc" id="L97">    try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();</span>
+<span class="fc" id="L98">        DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream)) {</span>
+
+<span class="fc" id="L100">      dataOutputStream.writeInt(identifier);</span>
+<span class="fc" id="L101">      dataOutputStream.writeChar(DELIMITER);</span>
+
+<span class="fc" id="L103">      byte[] byteSenderName = senderUsername.getBytes(StandardCharsets.UTF_8);</span>
+<span class="fc" id="L104">      dataOutputStream.writeInt(byteSenderName.length);</span>
+<span class="fc" id="L105">      dataOutputStream.writeChar(DELIMITER);</span>
+<span class="fc" id="L106">      dataOutputStream.write(byteSenderName);</span>
+<span class="fc" id="L107">      dataOutputStream.writeChar(DELIMITER);</span>
+
+<span class="fc" id="L109">      byte[] byteRecipientName = recipientUsername.getBytes(StandardCharsets.UTF_8);</span>
+<span class="fc" id="L110">      dataOutputStream.writeInt(byteRecipientName.length);</span>
+<span class="fc" id="L111">      dataOutputStream.writeChar(DELIMITER);</span>
+<span class="fc" id="L112">      dataOutputStream.write(byteRecipientName);</span>
+<span class="fc" id="L113">      dataOutputStream.writeChar(DELIMITER);</span>
+
+
+<span class="fc" id="L116">      byte[] byteMsg = message.getBytes(StandardCharsets.UTF_8);</span>
+<span class="fc" id="L117">      dataOutputStream.writeInt(byteMsg.length);</span>
+<span class="fc" id="L118">      dataOutputStream.writeChar(DELIMITER);</span>
+<span class="fc" id="L119">      dataOutputStream.write(byteMsg);</span>
+
+
+<span class="fc" id="L122">      byte[] byteDirectMsg = byteArrayOutputStream.toByteArray();</span>
+<span class="fc" id="L123">      return byteDirectMsg;</span>
+<span class="nc" id="L124">    } catch (IOException e) {</span>
+<span class="nc" id="L125">      throw new RuntimeException(e);</span>
+    }
+  }
+
+  /**
+   * Get the identifier
+   * @return the identifier
+   */
+  public int getIdentifier() {
+<span class="fc" id="L134">    return this.identifier;</span>
+  }
+
+  /**
+   * Get the user's name
+   * @return the user's name
+   */
+  public String getUsername() {
+<span class="fc" id="L142">    return this.senderUsername;</span>
+  }
+
+  /**
+   * Get the recipient username
+   * @return the recipient username
+   */
+  public String getRecipientUsername() {
+<span class="fc" id="L150">    return recipientUsername;</span>
+  }
+
+  /**
+   * Get the message
+   * @return the message
+   */
+  public String getMessage() {
+<span class="fc" id="L158">    return message;</span>
+  }
+
+  /**
+   * Set the identifier
+   * @param identifier  the identifier
+   */
+  public void setIdentifier(int identifier) {
+<span class="fc" id="L166">    this.identifier = identifier;</span>
+<span class="fc" id="L167">  }</span>
+
+  /**
+   * Set the sender username
+   * @param senderUsername  the sender username
+   */
+  public void setSenderUsername(String senderUsername) {
+<span class="fc" id="L174">    this.senderUsername = senderUsername;</span>
+<span class="fc" id="L175">  }</span>
+
+  /**
+   * Set the recipient username
+   * @param recipientUsername  the recipient username
+   */
+  public void setRecipientUsername(String recipientUsername) {
+<span class="fc" id="L182">    this.recipientUsername = recipientUsername;</span>
+<span class="fc" id="L183">  }</span>
+
+  /**
+   * Set the message
+   * @param message  the message
+   */
+  public void setMessage(String message) {
+<span class="fc" id="L190">    this.message = message;</span>
+<span class="fc" id="L191">  }</span>
+
+  /**
+   * Make sure the DirectMessage objects are equals
+   * @return true if it's all equal
+   */
+  @Override
+  public boolean equals(Object ob) {
+<span class="fc bfc" id="L199" title="All 2 branches covered.">    if(this == ob) {</span>
+<span class="fc" id="L200">      return true;</span>
+    }
+<span class="fc bfc" id="L202" title="All 4 branches covered.">    if(ob == null || getClass() != ob.getClass()) {</span>
+<span class="fc" id="L203">      return false;</span>
+    }
+<span class="fc" id="L205">    DirectMessage directMessage = (DirectMessage) ob;</span>
+<span class="fc bfc" id="L206" title="All 2 branches covered.">    return Objects.equals(senderUsername, directMessage.senderUsername)</span>
+<span class="fc bfc" id="L207" title="All 2 branches covered.">            &amp;&amp; Objects.equals(recipientUsername, directMessage.recipientUsername)</span>
+<span class="fc bfc" id="L208" title="All 2 branches covered.">            &amp;&amp; Objects.equals(message, directMessage.message);</span>
+  }
+
+  /**
+   * Hash code of the DirectMessage object
+   * @return hash code
+   */
+  @Override
+  public int hashCode() {
+<span class="fc" id="L217">    return Objects.hash(senderUsername, recipientUsername, message);</span>
+  }
+
+  /**
+   * To string show all the DirectMessage's info
+   * @return string
+   */
+  @Override
+  public String toString() {
+<span class="fc" id="L226">    return String.format(&quot;(Direct Message) %s send to %s: %s&quot;, getUsername(),getRecipientUsername(),getMessage());</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>
