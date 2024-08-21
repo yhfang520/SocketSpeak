@@ -10,17 +10,17 @@ in the chat room, or that goes directly to a single, specified client. This prog
 - invoke `main` in `ChatServer`
 ```
 [port]
-5010
+1010
 ```
 - invoke `main` in `ChatClient`
 ```
 [port] [username]
-5010 Anne
-5010 Bob
-5010 Tom
+1010 Anne
+1010 Bob
+1010 Tom
 or 
 [port] [username] [IP]
-5010 Anne 127.0.0.1
+1010 Anne 127.0.0.1
 ```
 ##### tips:
 - `IP` must be same with server IP address. It will be 'localhost' if not given.
@@ -28,13 +28,16 @@ or
 
 ##### file structure:
 ```
+ - Socket-Speak
+  - lib 
+        RandomInsult.jar
   - src
-    - main
-      - java
-        - Client
-           - ChatClient (main method) 
-        - Server
-           - ChatSrever (main method)
+      - main
+        - java
+           - Client
+              - ChatClient (main method) 
+           - Server
+              - ChatSrever (main method)
   - insult_grammar.json
 ```
 ##### tip:
@@ -51,24 +54,41 @@ To send message the user must use additional commands. You may type "?" to check
   With the above commands, ****no messages**** are sent unless the @user, @all, !user commands are used.
 
 ### Sample Screenshot Run the Program
-#### Client Connect
+#### Client Connect 
 - The server side when client connect to the port
-  ![img_txt](./image/user_connect.png)
+![img_txt](./image/user_connect.png)
 - Up to 10 clients can be connected and in a chat room at one time
-  ![img_txt](./image/maximum_client.png)
+![img_txt](./image/maximum_client.png)
 
-#### Display Command Menu
-- Screenshot when display the command menu
+#### Display Command Menu 
+- Screenshot when display the command menu 
   ![img_txt](./image/display_menu.png)
+
+#### Direct Message
+- The client sender side message when sending a direct message directly to another client
+  ![img_txt](./image/directMessage_sender.png)
+- The client receiver side message getting a direct message directly from another client
+  ![img_txt](./image/directMessage_reciver.png)
+- Screenshot of server side when client sending a direct message directly to another client
+  ![img_txt](./image/directMessage_server_side.png)
+
+#### Broadcast Message
+- The client sender side message when sending a broadcast message to all client 
+  ![img_txt](./image/broadcastMessage_sender.png)
+- One of the client receiver side message getting a broadcast message from one of the client
+  ![img_txt](./image/broadcastMessage_reciver.png)
+- Screenshot of server side when client sending a broadcast message to all client 
+  ![img_txt](./image/broadcastMessage_server_side.png)
 
 #### Query Response
 - The client may check who is connected
   ![img_txt](./image/queryResponse.png)
 
-#### Random Sentence Generator
-- The client sender side message when sending an insult message directly to another client
+#### Insult Message 
+- The client sender side message when sending an insult message directly to another client 
   ![img_txt](./image/insultMessage_sender.png)
 - The client receiver side message getting an insult message directly from another client
   ![img_txt](./image/insultMessage_reciver.png)
-- Screenshot of server side when client sending an insult message directly to another client
+- Screenshot of server side when client sending an insult message directly to another client 
   ![img_txt](./image/insultMessage_server_side.png)
+
